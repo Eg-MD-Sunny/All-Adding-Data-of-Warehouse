@@ -34,7 +34,9 @@ and w.Id in (26)
 -----|| 2nd Part
 -----|| Name: Available in Shelve
 
-SELECT max(te.ThingId) MaximumThingId,min(te.ThingId) MinimumThingId
+SELECT  max(te.ThingId) MaximumThingId,
+        min(te.ThingId) MinimumThingId
+
 FROM ThingEvent te
 JOIN ThingTransaction tt on tt.id = te.ThingTransactionId
 WHERE tt.CreatedOn >= '2022-08-12 00:00 +6:00'
@@ -44,13 +46,16 @@ AND toState in (256,34359738368)
 --#########################################################
 
 
-select  CAST(dbo.ToBdt(tt.CreatedOn) as date) Date,
-        CONCAT(DATEPART(HOUR,dbo.ToBdt(tt.CreatedOn)),':',DATEPART(minute,dbo.ToBdt(tt.CreatedOn))) Time,
-        pv.id PVID, pv.name ProductName,
-        dbo.tsn(FromState)FromState,
-        dbo.tsn(ToState)ToState,
-        e.BadgeId, e.FullName, d.DesignationName,
-        Count (*) Qty
+select   CAST(dbo.ToBdt(tt.CreatedOn) as date)                                                        [Date]
+        ,CONCAT(DATEPART(HOUR,dbo.ToBdt(tt.CreatedOn)),':',DATEPART(minute,dbo.ToBdt(tt.CreatedOn))) [Time]
+        ,pv.id                                                                                       [PVID]
+        ,pv.name                                                                                     [ProductName]
+        ,dbo.tsn(FromState)                                                                          [FromState]
+        ,dbo.tsn(ToState)                                                                            [ToState]
+        ,e.BadgeId                                                                                   [CDBD] 
+        ,e.FullName                                                                                  [Name] 
+        ,d.DesignationName                                                                           [DesignationName]
+        ,Count (*)                                                                                   [Qty]
 
 from ThingTransaction tt
 join ThingEvent te on te.ThingTransactionId=tt.id
@@ -60,18 +65,18 @@ left join Employee e on tt.CreatedByCustomerId=e.Id
 left join Warehouse w on te.WarehouseId=w.Id
 left join Designation d on e.DesignationId=d.Id
 
-where   tt.CreatedOn >= '2022-08-12 00:00 +06:00'
+where tt.CreatedOn >= '2022-08-12 00:00 +06:00'
 and tt.CreatedOn < '2022-08-19 00:00 +06:00'
 and toState in (256,34359738368)
 and pv.Id in (23334,30605)
 and t.id>=33748120 ------ MinimumThingId
 and t.id<=161196042 ------ MaximumThingId
 
-Group By    CAST(dbo.ToBdt(tt.CreatedOn) as date) ,
-            CONCAT(DATEPART(HOUR,dbo.ToBdt(tt.CreatedOn)),':',DATEPART(minute,dbo.ToBdt(tt.CreatedOn))) ,
-            pv.id , pv.name ,
-            dbo.tsn(FromState),
-            dbo.tsn(ToState),
-            e.BadgeId, e.FullName, d.DesignationName, w.Name
+Group By CAST(dbo.ToBdt(tt.CreatedOn) as date),
+        CONCAT(DATEPART(HOUR,dbo.ToBdt(tt.CreatedOn)),':',DATEPART(minute,dbo.ToBdt(tt.CreatedOn))),
+        pv.id , pv.name ,
+        dbo.tsn(FromState),
+        dbo.tsn(ToState),
+        e.BadgeId, e.FullName, d.DesignationName, w.Name
 
 Order by 1,2
